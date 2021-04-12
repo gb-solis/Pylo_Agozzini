@@ -21,8 +21,8 @@ def smoothCommand(path_in, path_out, windowSize, windowType='hanning', points=10
     points.
     '''
     music = Music(path_in)
-    music.frames = smooth(music, int(windowSize), windowType) # Need to change this!
-    frames = [int(i) for i in music.frames]
+    smooth(music, int(windowSize), windowType) # Need to change this!
+    frames = music.frames
     if plot:
         from matplotlib import pyplot as plt
         plt.plot(frames[:points])
