@@ -54,7 +54,7 @@ def main(argv):
     inputfile = ''
     outputfile = ''
     try:
-        opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+        opts, args = getopt.getopt(argv, 'hi:o:', ['ifile=','ofile='])
     except getopt.GetoptError:
         print('test.py -i <inputfile> -o <outputfile>')
         sys.exit(2)
@@ -62,9 +62,9 @@ def main(argv):
         if opt == '-h':
             print('test.py -i <inputfile> -o <outputfile>')
             sys.exit()
-        elif opt in ("-i", "--ifile"):
+        elif opt in ('-i', '--ifile'):
             inputfile = arg
-        elif opt in ("-o", "--ofile"):
+        elif opt in ('-o', '--ofile'):
             outputfile = arg
             
     # Do something with inputfile and outputfile
