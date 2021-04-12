@@ -26,8 +26,9 @@ class Music:
     # adapted from https://scipy-cookbook.readthedocs.io/items/SignalSmooth.html
     def smooth(self, windowSize, window='hanning'):
         window = window.lower()
-        
+        print(f'number of frames: {len(self.frames)}')
         soundwave = np.array([int(frame) for frame in self.frames])
+        print(f'size of "soundwave: {len(soundwave)}')
         
         if soundwave.size < windowSize:
             raise ValueError("Input vector needs to be bigger than window "
@@ -43,7 +44,9 @@ class Music:
     
         soundwaveA = soundwave[windowSize-1 : 0 : -1]
         soundwaveB = soundwave[-2 : -windowSize-1 : -1]
+        print(f'size soundwaveA: {len(soundwaveA)}, soundwaveB: {len(soundwaveB)}')
         s = np.r_[soundwaveA, soundwave, soundwaveB]
+        print(f'new total lenght: {len(s)}')
         #print(len(s))
         
         if window == 'flat': #moving average
@@ -51,14 +54,15 @@ class Music:
         else:
             w = eval('np.' + window + '(windowSize)')
     
-        output = np.convolve(w/w.sum(), s, mode='valid')
+        outputRaw = np.convolve(w/w.sum(), s, mode='valid')
+        
+        print(f'len post-convolution: {len(outputRaw)}')
+        
+        output = [int(frame) for frame in 
+                  outputRaw[windowSize//2 - 1 : -windowSize//2]]
         
         self.frames = bytes(output)
         
-        # if bits:
-        #     return np.array([bytes(frame) for frame in output])
-        # else:
-        #     return output
 
     # Saves another .wav. file at filepath with the parameters and frames of
     # the object
