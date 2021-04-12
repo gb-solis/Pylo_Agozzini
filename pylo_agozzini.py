@@ -14,7 +14,7 @@ class Music:
     def __init__(self, filepath):
         with wave.open(filepath,mode='rb') as inputfile:
             self.params = inputfile.getparams()
-            nframes = self.params[3]
+            nframes = self.params.nframes
             self.frames = inputfile.readframes(nframes)
 
     """ TODO: convolutes the music with a filter function. Need to learn about
@@ -30,12 +30,21 @@ class Music:
         with wave.open(filepath, 'w') as outputfile:
             outputfile.setparams(self.params)
             outputfile.writeframes(self.frames)
+    
+    def __repr__(self):
+        return str(self.params)
 
+    def __len__(self):
+        return self.params.nframes
+    
+    def __getitem__(self, index):
+        return self.frames[index]
+
+    
 """ Helper function for debugging. """
 def debug(inputpath, outputpath):
     music = Music(inputpath)
-    print(music.params)
-    print(music.frames[:10])
+    print(music)
     music.output(outputpath)
     
 """ Code below adapted from 
