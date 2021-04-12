@@ -1,32 +1,34 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Apr 11 20:09:43 2021
-
 @author: Leonardo A. Lessa & Gabriel Solis
 """
 import wave
 import sys
 import getopt
+import numpy as np
 
 class Music:
     
-    """ Opens .wav file at filepath and saves its parameters and frames. """
     def __init__(self, filepath):
-        with wave.open(filepath,mode='rb') as inputfile:
+        """ Opens .wav file at filepath and saves its parameters and frames."""
+        with wave.open(filepath, mode='rb') as inputfile:
             self.params = inputfile.getparams()
             nframes = self.params.nframes
             self.frames = inputfile.readframes(nframes)
 
-    """ TODO: convolutes the music with a filter function. Need to learn about
-    audio processing techniques, such as windowing.
-    """
     def convolve(self, f, windowSize):
+        """ TODO: convolutes the music with a filter function. Need to learn 
+        about audio processing techniques, such as windowing.
+        """
         pass
 
       
     # adapted from https://scipy-cookbook.readthedocs.io/items/SignalSmooth.html
-    def smooth(self, windowSize, window='hanning'):
-        window = window.lower()
+    def smooth(self, windowSize, windowType='hanning'):
+        ''' Smoothens the input signal via convolution, using a window of size
+        windowSize, and of tipe windowType'''
+        windowType = windowType.lower()
         soundwave = np.array([int(frame) for frame in self.frames])
         
         if soundwave.size < windowSize:
@@ -35,7 +37,7 @@ class Music:
         if windowSize < 3:
             return soundwave
     
-        if window not in ['flat', 'hanning', 'hamming', 'bartlett', 
+        if windowType not in ['flat', 'hanning', 'hamming', 'bartlett', 
                           'blackman']:
             raise ValueError("Window is one of 'flat', 'hanning', 'hamming',"
                 " 'bartlett', 'blackman'")
@@ -44,26 +46,29 @@ class Music:
         margemEsquerda = soundwave[windowSize-1 : 0 : -1]
         margemDireita = soundwave[-2 : -windowSize-1 : -1]
         
-        s = np.r_[margemEsquerda, soundwave, margemDireita] # concatenemos as três
+        # concatenemos as três
+        s = np.r_[margemEsquerda, soundwave, margemDireita]
         
-        if window == 'flat': # moving-average
+        if windowType == 'flat': # moving-average
             w = np.ones(windowSize,'d')
         else:
-            w = eval('np.' + window + '(windowSize)')
+            w = eval('np.' + windowType + '(windowSize)')
     
         outputRaw = np.convolve(w/w.sum(), s, mode='valid') 
-        # removemos as margens e transformamos elems. em inteiros
+        
+        # removemos as margens, transformamos elems. em inteiros
         output = [int(frame) for frame in 
                   outputRaw[windowSize//2 - 1 : -windowSize//2]]
+        
         # transformamos lista em bytes. TEM de ser aplicado à lista toda,
         # por algum motivo.
         self.frames = bytes(output)
       
       
-    """ Saves another .wav. file at filepath with the parameters and frames of
-    the object.
-    """
     def output(self, filepath):
+        """ Saves another .wav. file at filepath with the parameters and frames
+        of the object.
+        """
         with wave.open(filepath, 'w') as outputfile:
             outputfile.setparams(self.params)
             outputfile.writeframes(self.frames)
@@ -78,17 +83,18 @@ class Music:
         return self.frames[index]
 
     
-""" Helper function for debugging. """
 def debug(inputpath, outputpath):
+    """ Helper function for debugging. """
     music = Music(inputpath)
     print(music)
     music.output(outputpath)
     
 def smoothtest(path_in, path_out, windowSize, windowType='hanning', points=100, 
                plot=True, save=True):
-    ''' gets file from "path_in" and applies smooth(windowSize, windowType)
-    If "save" is set to True, a .wav file is saved in "path_out", but under a new name.
-    If "plot" is set to True, the first "points" points are plotted.
+    ''' Helper function to speed up the workflow with the smooth filter.
+    Gets file from "path_in" and applies smooth(windowSize, windowType)
+    May save it in 'path_out', under a new name, or plot the first "points" 
+    points.
     '''
     som = Music(path_in)
     som.smooth(windowSize, windowType)
@@ -100,9 +106,8 @@ def smoothtest(path_in, path_out, windowSize, windowType='hanning', points=100,
         som.output(path_out[:-4] + f'_smooth_{windowType}_{windowSize}.wav')    
   
   
-""" Code below adapted from 
-https://www.tutorialspoint.com/python/python_command_line_arguments.htm
-"""
+# Code below adapted from 
+# https://www.tutorialspoint.com/python/python_command_line_arguments.htm
 def main(argv):
     inputfile = ''
     outputfile = ''
