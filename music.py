@@ -37,15 +37,21 @@ class Music:
     def frames(self):
         # takes byte-like frames and presents them as integers between 0, 255
         byte_frames = self._frames
-        return [round(f) for f in byte_frames]
+        # bytes are converted to int automatically, for some reason
+        return [f for f in byte_frames]
     
     @frames.setter 
-    def frames(self, int_frames):
-        # takes a list of integer frames and stores them as byte-like frames
-        if any(not isinstance(f, int) for f in int_frames):
-            raise ValueError('The frames must be represented by integers')
-        if max(int_frames) > 255:
-            raise ValueError('The frames must be between 0 and 255')
+    def frames(self, num_frames):
+        # takes a list of numerical frames and stores them as byte-like frames
+        if any(not isinstance(f, int) for f in num_frames):
+            # if some are not ints, check if are at least float
+            if any(not isinstance(f, float) for f in num_frames):
+                raise ValueError('The frames must contain numerical values only')
+            else:
+                num_frames = [round(f) for f in num_frames]
+            
+        if max(num_frames) > 255:
+            raise ValueError('The frame values must be between 0 and 255')
         
-        self._frames = bytes(int_frames)
-        self.params.nframes = len(self._frames)
+        self._frames = bytes(num_frames)
+        # TODO: atualizar self.params.nframes = len(self._frames)
